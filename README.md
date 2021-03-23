@@ -4,9 +4,15 @@ The [scripted-decision-debugger.js](scripted-decision-debugger.js) code could be
 
 It contains a function which accepts an array of log messages to be displayed in a pop-up window and/or in the login screen during an authentication journey.
 
-The pop-up window can continuously display the log data from the parent window, and serve as a log tailing tool. The log data presentation and appearance are easy to change with basic JavaScript and CSS; see comments in the function code for additional details.
+In addition, the log messages will be optionally outputted with the `logger.error(String message)` method.
+
+The pop-up window can continuously display the log data from the parent window, and serve as a log tailing tool. The log data presentation and appearance are easy to change with basic JavaScript and CSS.
 
 You will need to allow pop-ups for your AM origin.
+
+Optionally, you can control presence of the log data in the user interface with a URL query string parameter `&debug=true`. This can be enabled by providing the `useDebugParameter` option in the function call.
+
+See comments in the function code for additional details.
 
 ## Authentication Journey Example
 
@@ -18,7 +24,7 @@ You will need to allow pop-ups for your AM origin.
 
 ## AM Script Examples
 
-Two example scripts are provided that were used in the above journey, both including the function copied from [scripted-decision-debugger.js](scripted-decision-debugger.js).
+Two example scripts are provided, which were used in the above journey, both including the function copied from [scripted-decision-debugger.js](scripted-decision-debugger.js).
 
 In both examples, logs are displayed in the pop-up window _and_ in the login screen, but using only one of the display options is also supported.
 
@@ -57,6 +63,9 @@ frScript.messages.forEach(function (message) {
  */
 showLogs({
     logs: frScript.messages,
+    // popupTitle: 'Debugger',
+    // useDebugParameter: true,
+    // noLoggerError: true,
     // noPopup: true,
     // noText: true
 })
@@ -111,6 +120,9 @@ frScript.messages.forEach(function (message) {
  */
 showLogs({
     logs: frScript.messages,
+    // popupTitle: 'Debugger',
+    // useDebugParameter: true,
+    // noLoggerError: true,
     // noPopup: true,
     // noText: true
 })
