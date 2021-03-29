@@ -37,7 +37,7 @@
  * @returns {undefined} The function sends callbacks to the client side, but otherwise, returns nothing.
  *
  * @author Konstantin Lapine <Konstantin.Lapine@forgerock.com>
- * @version 0.3.0
+ * @version 0.3.1
  * @license MIT
  */
 function showLogs (options) {
@@ -164,8 +164,14 @@ function showLogs (options) {
         function getTextContentModifierScript() {
             var script = []
 
-            script.push("var aDiv = document.querySelector('div[role=\"alert\"], div[role=\"presentation\"]')")
-            script.push("aDiv.innerHTML = aDiv.textContent")
+            script.push("var alertElements = document.querySelectorAll('div[role=\"alert\"], div[role=\"presentation\"]')")
+            script.push(
+                "Array.prototype.slice.call(alertElements).forEach(function (e) { \n\
+                    if (/^(\\s)*<(?!!)/.test(e.textContent)) { \n\
+                        e.innerHTML = e.textContent \n\
+                    } \n\
+                })"
+            )
 
             return script.join('\n')
         }
