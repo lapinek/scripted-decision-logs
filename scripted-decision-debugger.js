@@ -21,7 +21,7 @@
  * If not provided or falsy, each log message will be outputted with the logger object method.
  * @param {boolean} [options.noPopup] Do NOT show logs in a pop-up window.
  * @param {boolean} [options.noText] Do NOT show current log in the login screen.
- * CAUTION: the callbacks form will auto-submit if no text is displayed in the login screen!
+ * CAUTION: the callbacks form will auto-submit if no login form callbacks are detected!
  * Make sure your journey has another stopping point (that is, a node with a callback) to avoid loops on failed login.
  *
  * @example
@@ -37,7 +37,7 @@
  * @returns {undefined} The function sends callbacks to the client side, but otherwise, returns nothing.
  *
  * @author Konstantin Lapine <Konstantin.Lapine@forgerock.com>
- * @version 0.3.1
+ * @version 0.3.2
  * @license MIT
  */
 function showLogs (options) {
@@ -132,10 +132,13 @@ function showLogs (options) {
 
             /**
              * Auto-submit the callbacks form, if no text is to be displayed in the login screen.
-             * CAUTION: might create a loop on login failure IF there are no other callbacks in the journey.
+             * CAUTION: might create a loop on login failure IF there are no login form callbacks detected!
+             *
              */
             if (options.noText) {
-                script.push("document.querySelector('button[type=\"submit\"]').click()")
+                script.push("if (!document.querySelector('div[role=\"alert\"], div[role=\"presentation\"]')) { \n\
+                    document.querySelector('button[type=\"submit\"]').click() \n\
+                }")
             }
 
             return script.join('\n')
