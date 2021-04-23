@@ -1,3 +1,14 @@
+/* An example of calling the debugger function.
+showLogs({
+    logs: logs,
+    // popupTitle: 'Debugger',
+    // useDebugParameter: true,
+    // noLoggerError: true,
+    // noPopup: true,
+    // noText: true
+})
+*/
+
 /**
  * Displays scripted decision log messages in a named pop-up window and/or in the login screen.
  *
@@ -24,17 +35,9 @@
  * CAUTION: the callbacks form will auto-submit if no login form callbacks are detected!
  * Make sure your journey has another stopping point (that is, a node with a callback) to avoid loops on failed login.
  *
- * @example
- * showLogs({
- *     logs: messagesArray,
- *     // popupTitle: 'Debugger',
- *     // useDebugParameter: true,
- *     // noLoggerError: true,
- *     // noPopup: true,
- *     // noText: true
- * })
- *
  * @returns {undefined} The function sends callbacks to the client side, but otherwise, returns nothing.
+ * After the callbacks are completed, the function will exit the script setting its outcome to "true".
+ * Thus, "true" is the expected outcome to be added to the scripted decision node using this code.
  *
  * @author Konstantin Lapine <Konstantin.Lapine@forgerock.com>
  * @version 0.3.2

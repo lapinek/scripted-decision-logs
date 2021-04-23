@@ -1,68 +1,62 @@
 # Scripted Decision Debugger
 
-The [scripted-decision-debugger.js](scripted-decision-debugger.js) code could be added to a scripted decision node script.
+## Overview
 
-It contains a function which accepts an array of log messages to be displayed in a pop-up window and/or in the login screen during an authentication journey.
+The [scripted-decision-debugger.js](scripted-decision-debugger.js) code could be used in a scripted decision node script to display debug information in a pop-up window and/or in the login screen during an authentication journey.
 
-In addition, the log messages will be optionally outputted with the `logger.error(String message)` method.
+The pop-up window can continuously display the log data from the parent login window, and serve as a log tailing tool. You will need to allow pop-ups for your AM origin.
 
-The pop-up window can continuously display the log data from the parent window, and serve as a log tailing tool. The log data presentation and appearance are easy to change with basic JavaScript and CSS.
+The log data presentation and appearance are easy to change with some basic JavaScript and CSS.
 
-You will need to allow pop-ups for your AM origin.
+> In addition, by default, the logs will be outputted with the `logger.error(String log)` method. This can be disabled with the `noLoggerError: true` option.
 
-Optionally, you can control presence of the log data in the user interface with a URL query string parameter `&debug=true`. This can be enabled by providing the `useDebugParameter` option in the function call.
+Optionally, you can enable control of this this functionality with a URL query string parameter `&debug=true|false`. This can be enabled by providing the `useDebugParameter` option
 
-See comments in the function code for additional details.
+## How it works
 
-## Authentication Journey Example
+The [scripted-decision-debugger.js](scripted-decision-debugger.js) code contains a function and an example of a caller. See comments in the function code for the supported options.
+
+## How to make it work
+
+* Copy the code from [scripted-decision-debugger.js](scripted-decision-debugger.js) and paste it at the bottom of your scripted decision node debugger script.
+* In your scripted decision node script, create an array of log messages or choose a single message to be displayed in the browser.
+* Using the provided example, call the `showLogs(Object options)` function and pass in your message(s) as an option.
+* In your authentication journey/tree, add a scripted decision at a place where you want to output some content, and select the debugger script as the Script. Add "true" outcome to proceed with.
+
+## Examples
+
+The two example scripted decision node (SD) scripts below were used in the following journey in the SD Data Debugger and the SD Exceptions Debugger nodes:
 
 <img alt="Journey with the Identify Existing User nodes and Scripted Decision Debuggers." src="README_files/Journey.Identify-Existing-User.Scripted-Decision-Debuggers.png" width="1024">
 
-## Logs Output Example
+In both scripts, logs are displayed in the pop-up window _and_ in the login screen, but using only one of the display options is also supported:
 
 <img alt="Debugging Output for the journey with the Identify Existing User nodes and Scripted Decision Debuggers." src="README_files/Journey.Identify-Existing-User.Debugging-Output.png" width="1024">
 
-## AM Script Examples
+Both of the scripts had the code copied and pasted from [scripted-decision-debugger.js](scripted-decision-debugger.js).
 
-Two example scripts are provided, which were used in the above journey, both including the function copied from [scripted-decision-debugger.js](scripted-decision-debugger.js).
+### Script 1: the SD Data Debugger script
 
-In both examples, logs are displayed in the pop-up window _and_ in the login screen, but using only one of the display options is also supported.
-
-### Script 1: Data Debugger
-
-In the first script, which was associated with the SD Data Debugger nodes shown above, the log messages are populated with generic data, that could be collected and displayed at different points in an authentication journey.
+In the first script, the log messages are populated with some generic data that could be collected and displayed at different points in an authentication journey.
 
 ```javascript
 // CUSTOM CODE
 
 /**
- * Namespace for the script variables.
+ * An array of log messages, populated with the journey data.
  */
-var frScript = {}
+var logs = []
 
-/**
- * An array of messages, populated with the journey data.
- */
-frScript.messages = []
-frScript.messages.push('Data Debugger')
-frScript.messages.push('sharedState: ' + sharedState)
-frScript.messages.push('<div style="color: red;">ATTENTION!</div>')
-frScript.messages.push('transientState: ' + transientState)
-
-/**
- * Outputs the log messages on the server side.
- *
- * The same array of log messages could be printed out using the logger object methods.
- */
-frScript.messages.forEach(function (message) {
-    logger.error(String(message))
-})
+logs.push('Data Debugger')
+logs.push('sharedState: ' + sharedState)
+logs.push('<div style="color: red;">ATTENTION!</div>')
+logs.push('transientState: ' + transientState)
 
 /**
  * Calls the function copied from scripted-decision-debugger.js.
  */
 showLogs({
-    logs: frScript.messages,
+    logs: logs,
     // popupTitle: 'Debugger',
     // useDebugParameter: true,
     // noLoggerError: true,
@@ -76,50 +70,37 @@ showLogs({
 . . .
 ```
 
-### Script 2: Exceptions Debugger
+### Script 2: the SD Exceptions Debugger script
 
-In the second script, which was associated with the SD Exception Debugger node, the log messages are populated with exceptions that might occur in an authentication journey.
+In the second script, the log messages are populated with some exceptions that might occur in an authentication journey.
 
 ```javascript
 // CUSTOM CODE
 
 /**
- * Namespace for the script variables.
+ * An array of log messages, populated with the journey data.
  */
-var frScript = {}
+var logs = []
 
-/**
- * An array of messages, populated with the journey data.
- */
-frScript.messages = []
-frScript.messages.push('Exceptions Debugger')
+logs.push('Exceptions Debugger')
 
 try {
-    frScript.sharedStateKeys = sharedState.keySet()
+    sharedStateKeys = sharedState.keySet()
 } catch (e) {
-    frScript.messages.push(e)
+    logs.push(e)
 }
 
 try {
     password = secrets.getGenericSecret("scripted.node.secret.id").getAsUtf8()
 } catch(e) {
-    frScript.messages.push(e)
+    logs.push(e)
 }
-
-/**
- * Outputs the log messages on the server side.
- *
- * The same array of log messages could be printed out using the logger object methods.
- */
-frScript.messages.forEach(function (message) {
-    logger.error(String(message))
-})
 
 /**
  * Calls the function copied from scripted-decision-debugger.js.
  */
 showLogs({
-    logs: frScript.messages,
+    logs: logs,
     // popupTitle: 'Debugger',
     // useDebugParameter: true,
     // noLoggerError: true,
