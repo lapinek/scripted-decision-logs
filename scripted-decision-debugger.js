@@ -23,7 +23,7 @@ var savedLogs = sharedState.get('logs')
 if (savedLogs) {
     logs = logs.concat(JSON.parse(savedLogs))
 } else {
-    logs.push('No additional logs were saved in the authentication state objects by preceding nodes.')
+    logs.push('No additional logs were saved in the sharedState object by preceding nodes.')
 }
 
 showLogs({
