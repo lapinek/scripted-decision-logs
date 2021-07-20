@@ -1,4 +1,31 @@
-/* An example of calling the debugger function.
+/**
+ * @file Provide a function for debugging in the UI
+ * and an example of its use
+ * in a Scripted Decision Node script
+ * in ForgeRock Access Management (AM).
+ *
+ * @author Konstantin Lapine <Konstantin.Lapine@forgerock.com>
+ * @version 0.3.3
+ * @license MIT
+ */
+
+// An example of sending log messages to the debugger function: START
+var logs = []
+
+logs.push('Debugger: ')
+
+// . . .
+
+logs.push('sharedState: ' + sharedState)
+logs.push('transientState: ' + transientState)
+
+var savedLogs = sharedState.get('logs')
+if (savedLogs) {
+    logs = logs.concat(JSON.parse(savedLogs))
+} else {
+    logs.push('No additional logs were saved in the authentication state objects by preceding nodes.')
+}
+
 showLogs({
     logs: logs,
     // popupTitle: 'Debugger',
@@ -7,10 +34,11 @@ showLogs({
     // noPopup: true,
     // noText: true
 })
-*/
+// An example of sending log messages to the debugger function: END
+
 
 /**
- * Displays scripted decision log messages in a named pop-up window and/or in the login screen.
+ * Display scripted decision log messages in a named pop-up window and/or in the login screen.
  *
  * @see [ScriptTextOutputCallback]{@link https://backstage.forgerock.com/docs/am/7/authentication-guide/authn-supported-callbacks.html#backchannel-callbacks}
  *
@@ -18,34 +46,34 @@ showLogs({
  *
  * You can change the pop-up CSS by adding style definitions to the style array.
  * You can change the log messages presentation in other ways by changing the script array items.
- * You can change the initial pop-up window dimensions by modifying the debuggerWindowWidth and debuggerWindowHeight parameters.
+ * You can change the initial pop-up window dimensions by modifying the debuggerWindowWidthExpression and debuggerWindowHeightExpression variables.
  *
  * @param {object} options
  * @param {array} options.logs An array of logs.
  * @param {string} [options.popupTitle=Debugger] Window title for the pop-up window.
- * @param {boolean} [options.useDebugParameter]
+ * @param {boolean} [options.useDebugParameter=undefined]
  * Require "debug" parameter in the URL query string for displaying the log messages in the browser.
  * For example, &debug=true.
- * No "debug" parameter, no value provided, or a falsy value (for example, &debug=false) will allow to bypass the logger.
+ * If there is no "debug" parameter, or no value or a falsy value is provided (for example, &debug=false), it will allow to bypass the logger.
  * This will not affect the use of  the logger.error(String message) method:
- * @param {boolean} [options.noLoggerError] Do NOT output the logs with the logger.error(String message) method.
+ * @param {boolean} [options.noLoggerError=undefined] Do NOT output the logs with the logger.error(String message) method.
  * If not provided or falsy, each log message will be outputted with the logger object method.
- * @param {boolean} [options.noPopup] Do NOT show logs in a pop-up window.
- * @param {boolean} [options.noText] Do NOT show current log in the login screen.
+ * @param {boolean} [options.noPopup=undefined] Do NOT show logs in a pop-up window.
+ * @param {boolean} [options.noText=undefined] Do NOT show current log in the login screen.
  * CAUTION: the callbacks form will auto-submit if no login form callbacks are detected!
  * Make sure your journey has another stopping point (that is, a node with a callback) to avoid loops on failed login.
  *
  * @returns {undefined} The function sends callbacks to the client side, but otherwise, returns nothing.
  * After the callbacks are completed, the function will exit the script setting its outcome to "true".
  * Thus, "true" is the expected outcome to be added to the scripted decision node using this code.
- *
- * @author Konstantin Lapine <Konstantin.Lapine@forgerock.com>
- * @version 0.3.2
- * @license MIT
  */
 function showLogs (options) {
+    var getPopupScript
+    var getTextContent
+    var getTextContentModifierScript
+
     /**
-     * Ensures options.logs is an array.
+     * Ensure options.logs is an array.
      */
     if (!Array.isArray(options.logs)) {
         options.logs = [options.logs]
@@ -78,7 +106,7 @@ function showLogs (options) {
          *
          * @returns {string}
          */
-        function getPopupScript () {
+        getPopupScript = function () {
             var script = []
 
             /**
@@ -89,17 +117,18 @@ function showLogs (options) {
              *
              * You can use hardcoded values instead.
              */
-            var debuggerWindowWidth = '(window.screen.availWidth - window.innerWidth)'
-            var debuggerWindowHeight = 'window.screen.availHeight'
+            var debuggerWindowWidthExpression = '(screen.availWidth - innerWidth)'
+            var debuggerWindowHeightExpression = 'screen.availHeight'
             var popupTitle = options.popupTitle || 'Debugger'
 
-            script.push("var p = open('', 'debuggerWindow', 'scrollbars=yes, width=' + " + debuggerWindowWidth + " + ', height=' + " + debuggerWindowHeight + ")")
+            script.push('var p = open(\'\', \'debuggerWindow\', \'scrollbars=yes, width=\' + ' + debuggerWindowWidthExpression + ' + \', height=\' + ' + debuggerWindowHeightExpression + ')')
 
-            script.push("p.document.write('<p>' + Date() + '</p>')")
+            script.push('p.document.write(\'<p>\' + Date() + \'</p>\')')
 
-            script.push("p.document.title = '" + popupTitle + "'")
+            script.push('p.document.title = "' + popupTitle + '"')
 
             options.logs.forEach(function (log) {
+                var stringsToReplace
                 /**
                  * Tries to determine if the log content deserves JSON formatting on the client side.
                  */
@@ -107,14 +136,24 @@ function showLogs (options) {
                     var typeofJson = typeof JSON.parse(JSON.stringify(log))
 
                     if (typeofJson === 'object') {
-                        script.push("p.document.write('<pre>' + JSON.stringify(" + JSON.stringify(log) + ", null, 4) + '</pre>')")
+                        script.push('p.document.write(\'<pre>\' + JSON.stringify(' + JSON.stringify(log) + ', null, 4) + \'</pre>\')')
                     } else {
                         throw new Error('Log cannot be parsed as a JSON object: ' + typeofJson)
                     }
                 } catch (e) {
                     // logger.error(e)
 
-                    script.push("p.document.write('<div>" + String(log).split("'").join("\\'") + "</div>')")
+                    stringsToReplace = {
+                        '\'': '\\\'',
+                        '\n': '<br/>'
+                    }
+
+                    log = String(log)
+                    Object.keys(stringsToReplace).forEach(function (key) {
+                        log = log.split(key).join(stringsToReplace[key])
+                    })
+
+                    script.push('p.document.write(\'<div>' + log + '</div>\')')
                 }
             })
 
@@ -124,24 +163,23 @@ function showLogs (options) {
              * The CSS to be applied in the pop-up window.
              */
             var style = []
-            style.push('* { font-family: \'Open Sans\', sans-serif }')
+            style.push('* { font-family: "Open Sans", sans-serif }')
             style.push('p {color: green}')
             style.push('div {margin-bottom: 8px}')
 
-            script.push('var style = document.createElement("style")')
+            script.push('var style = document.createElement(\'style\')')
             script.push('style.type = "text/css"')
-            script.push('style.appendChild(document.createTextNode("' + style.join(' ') + '"))');
+            script.push('style.appendChild(document.createTextNode(\'' + style.join(' ') + '\'))')
             script.push('p.document.head.appendChild(style)')
 
             /**
              * Auto-submit the callbacks form, if no text is to be displayed in the login screen.
              * CAUTION: might create a loop on login failure IF there are no login form callbacks detected!
-             *
              */
             if (options.noText) {
-                script.push("if (!document.querySelector('div[role=\"alert\"], div[role=\"presentation\"]')) { \n\
-                    document.querySelector('button[type=\"submit\"]').click() \n\
-                }")
+                script.push('if (!document.querySelector(\'div[role="alert"], div[role="presentation"]\')) { \n\
+                    document.querySelector(\'button[type="submit"]\').click() \n\
+                }')
             }
 
             return script.join('\n')
@@ -152,7 +190,7 @@ function showLogs (options) {
          *
          * @returns {string}
          */
-        function getTextContent () {
+        getTextContent = function () {
             var content = []
 
             content.push('<div style="text-align: left; margin-bottom: 8px;">')
@@ -167,16 +205,16 @@ function showLogs (options) {
          *
          * @returns {string}
          */
-        function getTextContentModifierScript() {
+        getTextContentModifierScript = function () {
             var script = []
 
-            script.push("var alertElements = document.querySelectorAll('div[role=\"alert\"], div[role=\"presentation\"]')")
+            script.push('var alertElements = document.querySelectorAll(\'div[role="alert"], div[role="presentation"]\')')
             script.push(
-                "Array.prototype.slice.call(alertElements).forEach(function (e) { \n\
+                'Array.prototype.slice.call(alertElements).forEach(function (e) { \n\
                     if (/^(\\s)*<(?!!)/.test(e.textContent)) { \n\
                         e.innerHTML = e.textContent \n\
                     } \n\
-                })"
+                })'
             )
 
             return script.join('\n')
