@@ -1,4 +1,4 @@
-# Scripted Decision Debugger
+# Scripted Debugger for Authentication Trees in ForgeRock Access Management (AM)
 
 ## Overview
 
