@@ -2,7 +2,7 @@
 
 ## Overview
 
-The [scripted-decision-debugger.js](scripted-decision-debugger.js) code could be used in a scripted decision node script to display debug information in a pop-up window and/or in the login screen during an authentication journey.
+The [src/scripted-decision-debugger.js](src/scripted-decision-debugger.js) code could be used in a scripted decision node script to display debug information in a pop-up window and/or in the login screen during an authentication journey.
 
 The pop-up window can continuously display the log data from the parent login window, and serve as a log tailing tool. You will need to allow pop-ups for your AM origin.
 
@@ -14,11 +14,11 @@ Optionally, you can enable control of this this functionality with a URL query s
 
 ## How it works
 
-The [scripted-decision-debugger.js](scripted-decision-debugger.js) code contains a function and an example of a caller. See comments in the function code for the supported options.
+The [src/scripted-decision-debugger.js](src/scripted-decision-debugger.js) code contains a function and an example of a caller. See comments in the function code for the supported options.
 
 ## How to make it work
 
-* Copy the code from [scripted-decision-debugger.js](scripted-decision-debugger.js) and paste it at the bottom of your scripted decision node debugger script.
+* Copy the code from [src/scripted-decision-debugger.js](src/scripted-decision-debugger.js) and paste it at the bottom of your scripted decision node debugger script.
 * In your scripted decision node script, create an array of log messages or choose a single message to be displayed in the browser.
 * Using the provided example, call the `showLogs(Object options)` function and pass in your message(s) as an option.
 * In your authentication journey/tree, add a scripted decision at a place where you want to output some content, and select the debugger script as the Script. Add "true" outcome to proceed with.
@@ -33,7 +33,7 @@ In both scripts, logs are displayed in the pop-up window _and_ in the login scre
 
 <img alt="Debugging Output for the journey with the Identify Existing User nodes and Scripted Decision Debuggers." src="README_files/Journey.Identify-Existing-User.Debugging-Output.png" width="1024">
 
-Both of the scripts had the code copied and pasted from [scripted-decision-debugger.js](scripted-decision-debugger.js).
+Both of the scripts had the code copied and pasted from [src/scripted-decision-debugger.js](src/scripted-decision-debugger.js).
 
 ### Script 1: the SD Data Debugger script
 
@@ -53,7 +53,7 @@ logs.push('<div style="color: red;">ATTENTION!</div>')
 logs.push('transientState: ' + transientState)
 
 /**
- * Calls the function copied from scripted-decision-debugger.js.
+ * Calls the function copied from src/scripted-decision-debugger.js.
  */
 showLogs({
     logs: logs,
@@ -66,7 +66,7 @@ showLogs({
 
 // END OF CUSTOM CODE
 
-// CONTENT FROM scripted-decision-debugger.js:
+// CONTENT FROM src/scripted-decision-debugger.js:
 . . .
 ```
 
@@ -97,7 +97,7 @@ try {
 }
 
 /**
- * Calls the function copied from scripted-decision-debugger.js.
+ * Calls the function copied from src/scripted-decision-debugger.js.
  */
 showLogs({
     logs: logs,
@@ -110,6 +110,6 @@ showLogs({
 
 // END OF CUSTOM CODE
 
-// CONTENT FROM scripted-decision-debugger.js:
+// CONTENT FROM src/scripted-decision-debugger.js:
 . . .
 ```
