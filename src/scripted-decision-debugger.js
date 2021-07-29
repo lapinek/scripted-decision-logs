@@ -109,14 +109,28 @@ function showLogs (options) {
      * and if there is something to show.
      */
     if (debug) {
+        /**
+         * Apply additional processing to individual log content
+         * for displaying in different screens.
+         *
+         * @param {object} [options]
+         * @param {object|string} [options.log]
+         * @param {object} [options.container] An object with HTML element definition for the log content.
+         * @param {string} options.container.tagName
+         * @param {string} [options.container.class]
+         * @param {string} [options.container.style]
+         *
+         * @returns {string|undefined} A string representing the HTML element with the log content,
+         * or undefined if no log content is provided.
+         */
         processLog = function (options) {
             var stringsToReplace;
-            var log;
+            var processedLog;
 
             options = options || {};
 
             options.container = options.container || {
-                tag: 'div',
+                tagName: 'div',
                 style: 'text-align: left; margin-bottom: 8px;'
             };
 
@@ -129,9 +143,9 @@ function showLogs (options) {
 
                     if (typeofJson === 'object') {
                         if (options.scripted) {
-                            log = '<pre>\' + JSON.stringify(' + JSON.stringify(options.log) + ', null, 4) + \'</pre>';
+                            options.log = '<pre>\' + JSON.stringify(' + JSON.stringify(options.log) + ', null, 4) + \'</pre>';
                         } else {
-                            log = '<pre>' + JSON.stringify(options.log, null, 4) + '</pre>';
+                            options.log = '<pre>' + JSON.stringify(options.log, null, 4) + '</pre>';
                         }
                     } else {
                         throw new Error('Log cannot be parsed as a JSON object: ' + typeofJson);
@@ -147,16 +161,24 @@ function showLogs (options) {
 
                     stringsToReplace['\n'] = '<br/>';
 
-                    log = String(options.log);
+                    options.log = String(options.log);
+
                     Object.keys(stringsToReplace).forEach(function (key) {
-                        log = log.split(key).join(stringsToReplace[key]);
+                        options.log = options.log.split(key).join(stringsToReplace[key]);
                     });
                 }
             }
 
-            log = '<' + options.container.tag + ' style="' + options.container.style + '">' + log + '</' + options.container.tag + '>';
+            processedLog = '<' + options.container.tagName;
+            if (options.container.class) {
+                processedLog += ' class="' + options.container.class + '"';
+            }
+            if (options.container.style) {
+                processedLog += ' style="' + options.container.style + '"';
+            }
+            processedLog += '>' + options.log + '</' + options.container.tagName + '>';
 
-            return log;
+            return processedLog;
         };
 
         /**
@@ -181,14 +203,18 @@ function showLogs (options) {
 
             script.push('var p = open(\'\', \'debuggerWindow\', \'scrollbars=yes, width=\' + ' + debuggerWindowWidthExpression + ' + \', height=\' + ' + debuggerWindowHeightExpression + ');');
 
-            script.push('p.document.write(\'<p>\' + Date() + \'</p>\');');
+            script.push('p.document.write(\'<p class="date">\' + Date() + \'</p>\');');
 
             script.push('p.document.title = "' + popupTitle + '";');
 
             options.logs.forEach(function (log) {
                 var processedLog = String(processLog({
                     scripted: true,
-                    log: log
+                    log: log,
+                    container: {
+                        tagName: 'div',
+                        class: 'log'
+                    }
                 }));
 
                 script.push('p.document.write(\'' + processedLog + '\');');
@@ -201,8 +227,8 @@ function showLogs (options) {
              */
             var style = [];
             style.push('* { font-family: "Open Sans", sans-serif }');
-            style.push('p {color: green}');
-            style.push('div {margin-bottom: 8px}');
+            style.push('p.date {color: green}');
+            style.push('div.log {margin-bottom: 8px;}');
 
             script.push('var style = document.createElement(\'style\');');
             script.push('style.type = "text/css";');
@@ -232,7 +258,11 @@ function showLogs (options) {
 
             options.logs.forEach(function (log) {
                 content.push(String(processLog({
-                    log: log
+                    log: log,
+                    container: {
+                        tagName: 'div',
+                        style: 'text-align: left; margin-bottom: 8px;'
+                    }
                 })));
             });
 
