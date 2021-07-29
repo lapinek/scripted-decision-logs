@@ -5,7 +5,7 @@
  * in ForgeRock Access Management (AM).
  *
  * @author Konstantin Lapine <Konstantin.Lapine@forgerock.com>
- * @version 0.3.3
+ * @version 0.3.4
  * @license MIT
  */
 
