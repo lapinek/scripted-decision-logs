@@ -1,8 +1,10 @@
 {
   "scripts": {
-    "lint": "eslint src"
+    "lint": "eslint src",
+    "docs": "jsdoc2md ./src/* > ./docs/README.md"
   },
   "devDependencies": {
-    "eslint": "^7.28.0"
+    "eslint": "^7.28.0",
+    "jsdoc-to-markdown": "^7.0.1"
   }
 }
