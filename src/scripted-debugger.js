@@ -5,7 +5,7 @@
  * in ForgeRock Access Management (AM).
  *
  * @author Konstantin Lapine <Konstantin.Lapine@forgerock.com>
- * @version 0.3.5
+ * @version 0.3.6
  * @license MIT
  */
 
@@ -289,7 +289,7 @@ function showLogs (options) {
         getTextContentModifierScript = function () {
             var script = [];
 
-            script.push('var alertElements = document.querySelectorAll(\'div[role="alert"], div[role="presentation"]\');');
+            script.push('var alertElements = document.querySelectorAll(\'div[role="alert"], div[role="presentation"], div[class~="alert"]\');');
             script.push(
                 'Array.prototype.slice.call(alertElements).forEach(function (e) { \n\
                     if (/^(\\s)*<(?!!)/.test(e.textContent)) { \n\
